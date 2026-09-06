@@ -1,0 +1,26 @@
+name: Import portfolio source
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-portfolio.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out temporary repository
+        uses: actions/checkout@v4
+
+      - name: Import the verified portfolio history
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --branch main portfolio-main.bundle portfolio-source
+          cd portfolio-source
+          git remote add destination "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push destination main:main --force
