@@ -16,11 +16,14 @@ jobs:
       - name: Check out temporary repository
         uses: actions/checkout@v4
 
-      - name: Import the verified portfolio history
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Import the verified portfolio files
         run: |
           git clone --branch main portfolio-main.bundle portfolio-source
-          cd portfolio-source
-          git remote add destination "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push destination main:main --force
+          rsync -a --exclude='.git/' --exclude='.github/workflows/deploy-pages.yml' portfolio-source/ ./
+          rm -rf portfolio-source
+          rm -f portfolio-main.bundle
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish verified portfolio source"
+          git push origin main
